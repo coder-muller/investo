@@ -18,7 +18,7 @@ import { z } from "zod";
 
 const formSchema = z.object({
     email: z.string().email({ message: "Por favor, digite um email válido" }),
-    password: z.string().min(8, { message: "Por favor, digite sua senha" }),
+    password: z.string().min(1, { message: "Por favor, digite sua senha" }),
 })
 
 export default function Login() {
