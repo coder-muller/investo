@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { sendGetRequest } from "@/lib/fetchFunctions";
+import { sendGetRequest, sendPostRequest, sendPutRequest } from "@/lib/fetchFunctions";
 import { fetchStockPrice } from "@/lib/fetchPriceData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Product } from "@prisma/client";
@@ -211,32 +211,47 @@ export default function Wallet() {
         try {
             // Determinar se estamos criando um novo produto ou adicionando uma transação
             if (isNewProduct) {
-                // Criar novo produto e adicionar transação
-                const newProduct = {
+                const newProduct: Product = await sendPostRequest("/product", {
                     ticker: data.ticker,
                     name: data.name,
                     type: data.type,
                     quantity: data.quantity,
-                    averagePrice: data.price,
-                };
+                    price: data.price,
+                });
 
-                // Enviar requisição para criar novo produto
-                // await sendPostRequest("/product", newProduct);
+                const newProductId = newProduct.id;
+
+                await sendPostRequest("/transaction", {
+                    productId: newProductId,
+                    type: data.transactionType,
+                    quantity: data.quantity,
+                    price: data.price,
+                    date: data.date,
+                });
+
                 console.log("Criando novo produto:", newProduct);
                 toast.success("Produto adicionado com sucesso!");
             } else {
-                // Adicionar transação a um produto existente
-                const transaction = {
+                await sendPostRequest("/transaction", {
                     productId: data.productId,
                     type: data.transactionType,
                     quantity: data.quantity,
                     price: data.price,
                     date: data.date,
-                };
+                });
 
-                // Enviar requisição para adicionar transação
-                // await sendPostRequest("/transaction", transaction);
-                console.log("Adicionando transação:", transaction);
+                const oldTotalInvested = (productsWithPrices.find(product => product.id === data.productId)?.averagePrice || 0) * (productsWithPrices.find(product => product.id === data.productId)?.quantity || 0);
+                const newTotalInvested = oldTotalInvested + (data.price * data.quantity);
+                const newAveragePrice = newTotalInvested / ( (productsWithPrices.find(product => product.id === data.productId)?.quantity || 0) + data.quantity );
+                const newQuantity = (productsWithPrices.find(product => product.id === data.productId)?.quantity || 0) + data.quantity;
+
+                const updatedProduct = await sendPutRequest("/product", {
+                    id: data.productId,
+                    averagePrice: newAveragePrice,
+                    quantity: newQuantity,
+                });
+
+                console.log("Atualizando produto:", updatedProduct);
                 toast.success("Transação adicionada com sucesso!");
             }
 

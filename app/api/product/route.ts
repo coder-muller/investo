@@ -30,7 +30,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
 
-    const { ticker, name, type, quantity, averagePrice, price, dividend, expenses } = await request.json()
+    const { ticker, name, type, quantity, price } = await request.json()
 
     try {
         const userId = await checkValidUser()
@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
                 name,
                 type,
                 quantity: Number(quantity),
-                averagePrice: Number(averagePrice),
+                averagePrice: Number(price),
                 price: Number(price),
-                dividend: Number(dividend),
-                expenses: Number(expenses),
+                dividend: 0,
+                expenses: 0,
                 userId
             }
         })
