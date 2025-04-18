@@ -25,6 +25,7 @@ import { useForm } from "react-hook-form";
 import { Pie, PieChart, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 const chartConfig = {
     classes: {
@@ -59,7 +60,7 @@ export default function Wallet() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isNewProduct, setIsNewProduct] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const router = useRouter();
     // Definindo o esquema do formulário dentro do componente para acessar isNewProduct
     const formSchema = z.object({
         productId: z.string().optional()
@@ -270,6 +271,10 @@ export default function Wallet() {
         }
     };
 
+    function hendleOpenInformationPage(productId: string) {
+        router.push(`/account/wallet/${productId}`);
+    }
+
     return (
         <ScrollArea className="h-screen py-2 px-4">
             <div className="w-full flex flex-col gap-4">
@@ -377,7 +382,7 @@ export default function Wallet() {
                                                     <Badge variant="default" className="text-sm font-bold">{product.type}</Badge>
                                                     <Tooltip>
                                                         <TooltipTrigger>
-                                                            <Button variant="ghost" size="icon">
+                                                            <Button variant="ghost" size="icon" onClick={() => hendleOpenInformationPage(product.id)}>
                                                                 <Info className="w-4 h-4" />
                                                             </Button>
                                                         </TooltipTrigger>

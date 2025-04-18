@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "JWT_SECRET não definido" }, { status: 500 });
     }
 
-    const token = jwt.sign({ userId: user.id }, secret, { expiresIn: "1h" });
+    // JWT expira em 15 minutos
+    const token = jwt.sign({ userId: user.id }, secret, { expiresIn: 60 * 15 });
 
     // Criar resposta com cookies
     const response = NextResponse.json(
